@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/markwallsgrove/boltmap/internal/blitzortung"
+	"github.com/markwallsgrove/boltmap/internal/tui"
 )
 
 const defaultBroker = "tcp://blitzortung.ha.sed.pl:1883"
@@ -21,6 +24,18 @@ func brokerURL() string {
 }
 
 func main() {
+	tuiMode := flag.Bool("tui", false, "start the TUI map instead of stdout printing")
+	flag.Parse()
+
+	if *tuiMode {
+		p := tea.NewProgram(tui.NewModel(), tea.WithAltScreen())
+		if _, err := p.Run(); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
