@@ -12,11 +12,13 @@ const topic = "blitzortung/1.1/#"
 type Client struct {
 	mqttClient mqtt.Client
 	strikes    chan Strike
+	connState  chan bool
 }
 
 func NewClient() *Client {
 	return &Client{
-		strikes: make(chan Strike, 256),
+		strikes:   make(chan Strike, 256),
+		connState: make(chan bool, 2),
 	}
 }
 
@@ -38,6 +40,17 @@ func (c *Client) Connect(broker string) error {
 			default:
 			}
 		})
+		select {
+		case c.connState <- true:
+		default:
+		}
+	})
+
+	opts.SetConnectionLostHandler(func(_ mqtt.Client, _ error) {
+		select {
+		case c.connState <- false:
+		default:
+		}
 	})
 
 	c.mqttClient = mqtt.NewClient(opts)
@@ -51,6 +64,10 @@ func (c *Client) Connect(broker string) error {
 
 func (c *Client) Strikes() <-chan Strike {
 	return c.strikes
+}
+
+func (c *Client) ConnectionState() <-chan bool {
+	return c.connState
 }
 
 func uniqueClientID() string {

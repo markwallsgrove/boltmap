@@ -7,8 +7,10 @@ import (
 )
 
 var (
-	landStyle  = lipgloss.NewStyle().Background(lipgloss.Color("10")).Foreground(lipgloss.Color("10"))
-	oceanStyle = lipgloss.NewStyle().Background(lipgloss.Color("17")).Foreground(lipgloss.Color("17"))
+	landStyle       = lipgloss.NewStyle().Background(lipgloss.Color("10")).Foreground(lipgloss.Color("10"))
+	oceanStyle      = lipgloss.NewStyle().Background(lipgloss.Color("17")).Foreground(lipgloss.Color("17"))
+	strikeLandBase  = lipgloss.NewStyle().Background(lipgloss.Color("10"))
+	strikeOceanBase = lipgloss.NewStyle().Background(lipgloss.Color("17"))
 )
 
 const cellChar = " "
@@ -25,6 +27,36 @@ func Render(vp Viewport, cols, rows int) string {
 		for c := 0; c < cols; c++ {
 			lat, lon := cellToLatLon(vp, c, r, cols, rows)
 			if LandAt(lat, lon) {
+				sb.WriteString(landStyle.Render(cellChar))
+			} else {
+				sb.WriteString(oceanStyle.Render(cellChar))
+			}
+		}
+		if r < rows-1 {
+			sb.WriteByte('\n')
+		}
+	}
+	return sb.String()
+}
+
+// RenderWithOverlay renders the map with coloured strike markers at the given cell positions.
+// overlays maps (col, row) to a foreground colour for the strike dot.
+func RenderWithOverlay(vp Viewport, cols, rows int, overlays map[[2]int]lipgloss.Color) string {
+	if cols < 40 || rows < 20 {
+		return "Terminal too small"
+	}
+	var sb strings.Builder
+	for r := 0; r < rows; r++ {
+		for c := 0; c < cols; c++ {
+			lat, lon := cellToLatLon(vp, c, r, cols, rows)
+			isLand := LandAt(lat, lon)
+			if color, ok := overlays[[2]int{c, r}]; ok {
+				if isLand {
+					sb.WriteString(strikeLandBase.Foreground(color).Render("●"))
+				} else {
+					sb.WriteString(strikeOceanBase.Foreground(color).Render("●"))
+				}
+			} else if isLand {
 				sb.WriteString(landStyle.Render(cellChar))
 			} else {
 				sb.WriteString(oceanStyle.Render(cellChar))

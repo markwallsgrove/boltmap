@@ -25,10 +25,18 @@ func brokerURL() string {
 
 func main() {
 	tuiMode := flag.Bool("tui", false, "start the TUI map instead of stdout printing")
+	ttl := flag.Duration("ttl", 60*time.Second, "strike display duration")
 	flag.Parse()
 
 	if *tuiMode {
-		p := tea.NewProgram(tui.NewModel(), tea.WithAltScreen())
+		client := blitzortung.NewClient()
+		if err := client.Connect(brokerURL()); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		defer client.Disconnect()
+
+		p := tea.NewProgram(tui.NewModel(tui.Config{Client: client, TTL: *ttl}), tea.WithAltScreen())
 		if _, err := p.Run(); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
