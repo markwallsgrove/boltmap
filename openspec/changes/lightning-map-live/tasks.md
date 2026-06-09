@@ -50,7 +50,7 @@
 
 - [x] 9.1 Run `go build ./...` with no errors
 - [x] 9.2 Run `go test ./...` with all tests passing
-- [ ] 9.3 Start the live TUI and confirm strikes appear on the map as coloured dots
-- [ ] 9.4 Confirm strikes fade to grey after 10 s and disappear after 60 s
-- [ ] 9.5 Pan and zoom while strikes are visible; confirm they reproject correctly
-- [ ] 9.6 Confirm the stats bar updates every 500 ms with live rate and count
+- [x] 9.3 Start the live TUI and confirm strikes appear on the map as coloured dots
+- [x] 9.4 Confirm strikes fade to grey after 10 s and disappear after 60 s
+- [x] 9.5 Pan and zoom while strikes are visible; confirm they reproject correctly
+- [x] 9.6 Confirm the stats bar updates every 500 ms with live rate and count
