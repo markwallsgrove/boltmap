@@ -19,6 +19,12 @@ go build -o boltmap ./cmd/boltmap
 ./boltmap
 ```
 
+Override the default broker with `BOLTMAP_BROKER`:
+
+```sh
+BOLTMAP_BROKER=tcp://your-broker:1883 ./boltmap
+```
+
 Each strike is printed as a single coloured line:
 
 ```

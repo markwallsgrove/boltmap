@@ -11,14 +11,21 @@ import (
 	"github.com/markwallsgrove/boltmap/internal/blitzortung"
 )
 
-const broker = "tcp://blitzortung.ha.sed.pl:1883"
+const defaultBroker = "tcp://blitzortung.ha.sed.pl:1883"
+
+func brokerURL() string {
+	if v := os.Getenv("BOLTMAP_BROKER"); v != "" {
+		return v
+	}
+	return defaultBroker
+}
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
 	client := blitzortung.NewClient()
-	if err := client.Connect(broker); err != nil {
+	if err := client.Connect(brokerURL()); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %v\n", err)
 		os.Exit(1)
 	}
